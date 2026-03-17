@@ -1,370 +1,792 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Zyrt4ick</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>:: Zyrt4ick :: personal page ::</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap');
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;550;600&display=swap" rel="stylesheet">
+:root {
+  --red:    #cc0000;
+  --red2:   #880000;
+  --red3:   #440000;
+  --dim:    #1a0000;
+  --bg:     #060606;
+  --bg2:    #0e0e0e;
+  --border: #2a0000;
+  --text:   #999;
+  --bright: #cccccc;
+  --green:  #1a1a1a; /* used for very subtle bg texture */
+}
 
-    <!-- ТРЕКИНГ ПИКСЕЛЬ (загружается только после клика) -->
-    <script id="tracker-script" defer></script>
+* { margin:0; padding:0; box-sizing:border-box; }
 
-    <style>
-        * { margin:0; padding:0; box-sizing:border-box; }
-        html { scroll-behavior: smooth; }
-        body {
-            height: 100%;
-            background: #000 url('https://images.squarespace-cdn.com/content/v1/5fe4caeadae61a2f19719512/156a9750-a308-49e8-8a60-ff0e4b273a3f/Enchanting+Full+Moon?format=2500w') center/cover no-repeat fixed;
-            color: #e0e0e0;
-            font-family: 'Inter', sans-serif;
-            font-weight: 300;
-            line-height: 1.8;
-            overflow-x: hidden;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
+html { scroll-behavior: smooth; }
 
-        canvas {
-            position: fixed;
-            inset: 0;
-            z-index: 1;
-            pointer-events: none;
-            will-change: transform, opacity;
-        }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Share Tech Mono', 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  min-height: 100vh;
+  /* subtle scanline */
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.18) 2px,
+    rgba(0,0,0,0.18) 4px
+  );
+}
 
-        .overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.72);
-            z-index: 2;
-        }
+/* ─── INTRO / SPLASH ─── */
+#intro {
+  position: fixed; inset: 0; z-index: 200;
+  background: #000;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 0;
+  transition: opacity 1.2s, visibility 1.2s;
+}
+#intro.gone { opacity:0; visibility:hidden; pointer-events:none; }
 
-        .vignette {
-            position: fixed;
-            inset: 0;
-            box-shadow: inset 0 0 220px 90px rgba(0,0,0,0.93);
-            z-index: 3;
-            pointer-events: none;
-        }
+.splash-ascii {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  line-height: 1.25;
+  color: var(--red2);
+  text-align: center;
+  white-space: pre;
+  margin-bottom: 28px;
+  letter-spacing: 1px;
+}
 
-        .intro-screen {
-            position: fixed;
-            inset: 0;
-            z-index: 10;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: rgba(0,0,0,0.4);
-            backdrop-filter: blur(8px);
-            transition: opacity 1.2s ease, visibility 1.2s;
-        }
+.splash-ava {
+  width: 140px;
+  height: 140px;
+  object-fit: cover;
+  border: 1px solid var(--red2);
+  outline: 3px solid var(--red3);
+  outline-offset: 3px;
+  filter: grayscale(30%) contrast(1.1) brightness(0.9);
+  display: block;
+}
 
-        .intro-screen.hidden {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-        }
+.splash-title {
+  font-family: 'VT323', monospace;
+  font-size: 52px;
+  color: var(--red);
+  letter-spacing: 6px;
+  margin-top: 18px;
+  text-shadow: 0 0 20px rgba(180,0,0,0.4);
+}
 
-        .avatar-container {
-            text-align: center;
-            cursor: pointer;
-            user-select: none;
-            transition: transform 0.4s ease;
-        }
+.splash-sub {
+  font-size: 11px;
+  color: #333;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-top: 6px;
+}
 
-        .avatar-container:hover {
-            transform: scale(1.06);
-        }
+.splash-enter {
+  margin-top: 32px;
+  background: none;
+  border: 1px solid var(--red3);
+  color: var(--red2);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 4px;
+  padding: 8px 32px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all .25s;
+  position: relative;
+}
+.splash-enter::before { content: '[ '; }
+.splash-enter::after  { content: ' ]'; }
+.splash-enter:hover {
+  color: var(--red);
+  border-color: var(--red2);
+  text-shadow: 0 0 8px rgba(200,0,0,0.5);
+}
 
-        .avatar {
-            width: 220px;
-            height: 220px;
-            object-fit: cover;
-            border-radius: 50%;
-            border: 3px solid rgba(255,255,255,0.18);
-            box-shadow: 0 0 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.08);
-        }
+/* blinking cursor on enter button */
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+.blink { animation: blink 1s step-end infinite; }
 
-        .nickname {
-            margin-top: 28px;
-            font-size: 42px;
-            font-weight: 600;
-            letter-spacing: 2px;
-            text-shadow: 0 0 30px rgba(255,255,255,0.25);
-        }
+/* ─── MAIN ─── */
+#main {
+  opacity:0;
+  transition: opacity .8s ease .1s;
+  pointer-events: none;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 0 12px 60px;
+}
+#main.visible { opacity:1; pointer-events:all; }
 
-        .click-hint {
-            margin-top: 16px;
-            font-size: 18px;
-            opacity: 0.7;
-            letter-spacing: 1px;
-        }
+/* ─── TOP BAR ─── */
+.topbar {
+  border-bottom: 1px solid var(--border);
+  padding: 7px 0;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  font-size: 11px;
+  color: #333;
+  letter-spacing: 1px;
+}
+.topbar-logo {
+  font-family: 'VT323', monospace;
+  font-size: 22px;
+  color: var(--red);
+  letter-spacing: 3px;
+  margin-right: auto;
+}
+.topbar a {
+  color: #444;
+  text-decoration: none;
+  padding: 0 12px;
+  border-left: 1px solid #1a1a1a;
+  transition: color .2s;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.topbar a:hover { color: var(--red); }
 
-        .main-content {
-            position: relative;
-            z-index: 4;
-            min-height: 100vh;
-            padding: 140px 40px 140px;
-            opacity: 0;
-            transform: translateY(40px);
-            transition: opacity 1.4s ease 0.3s, transform 1.4s cubic-bezier(0.23,1,0.32,1);
-        }
+/* ─── LAYOUT ─── */
+.layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 0;
+  margin-top: 16px;
+}
 
-        .main-content.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
+/* ─── SIDEBAR ─── */
+.sidebar {
+  border-right: 1px solid var(--border);
+  padding-right: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
 
-        nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background: rgba(8,6,12,0.92);
-            backdrop-filter: blur(16px);
-            z-index: 20;
-            padding: 20px;
-            text-align: center;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-        }
+.widget {
+  border: 1px solid var(--border);
+  background: var(--bg2);
+}
 
-        nav a {
-            color: #d0d0d0;
-            text-decoration: none;
-            margin: 0 26px;
-            font-size: 17px;
-            font-weight: 500;
-            transition: all 0.35s;
-        }
+.widget-head {
+  background: var(--red3);
+  border-bottom: 1px solid var(--border);
+  padding: 4px 8px;
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--red);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.widget-head::before { content: '>> '; color: var(--red2); }
 
-        nav a:hover, nav a.active {
-            color: white;
-            transform: translateY(-1px);
-            text-shadow: 0 0 16px rgba(255,255,255,0.4);
-        }
+.widget-body { padding: 10px 10px; }
 
-        section {
-            max-width: 1080px;
-            margin: 0 auto 120px;
-            padding: 60px 50px;
-            background: rgba(10,10,14,0.68);
-            backdrop-filter: blur(12px);
-            border-radius: 22px;
-            border: 1px solid rgba(255,255,255,0.09);
-            box-shadow: 0 16px 60px rgba(0,0,0,0.75);
-        }
+/* avatar widget */
+.sb-ava {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  display: block;
+  filter: grayscale(25%) contrast(1.08);
+  border-bottom: 1px solid var(--border);
+}
 
-        h1 {
-            font-size: 44px;
-            font-weight: 600;
-            text-align: center;
-            margin-bottom: 50px;
-            color: white;
-            letter-spacing: 1.4px;
-            text-shadow: 0 4px 20px rgba(0,0,0,0.6);
-        }
+.sb-name {
+  font-family: 'VT323', monospace;
+  font-size: 26px;
+  color: var(--bright);
+  letter-spacing: 2px;
+  padding: 6px 10px 2px;
+}
+.sb-name span { color: var(--red); }
 
-        .links-list a {
-            display: block;
-            margin: 20px auto;
-            max-width: 420px;
-            padding: 16px 32px;
-            background: rgba(30,30,40,0.5);
-            border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 12px;
-            color: #e0f0ff;
-            text-decoration: none;
-            font-size: 19px;
-            text-align: center;
-            transition: all 0.3s;
-        }
+.sb-meta {
+  font-size: 10px;
+  color: #3a3a3a;
+  letter-spacing: 1px;
+  padding: 0 10px 8px;
+}
 
-        .links-list a:hover {
-            background: rgba(50,60,80,0.6);
-            border-color: rgba(160,200,255,0.4);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(0,80,200,0.2);
-        }
+/* status widget */
+.status-line {
+  font-size: 11px;
+  color: #3a3a3a;
+  margin-bottom: 4px;
+}
+.status-line span { color: var(--red2); }
 
-        .donate-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 24px;
-            margin-top: 40px;
-        }
+/* counter widget */
+.counter {
+  font-family: 'VT323', monospace;
+  font-size: 28px;
+  color: var(--red);
+  letter-spacing: 4px;
+  text-align: center;
+  padding: 4px 0;
+  text-shadow: 0 0 10px rgba(180,0,0,0.3);
+}
+.counter-sub {
+  font-size: 9px;
+  color: #2a2a2a;
+  letter-spacing: 2px;
+  text-align: center;
+  text-transform: uppercase;
+}
 
-        .donate-item {
-            background: rgba(20,20,35,0.6);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 14px;
-            padding: 24px;
-            text-align: center;
-            font-size: 18px;
-        }
+/* nav widget */
+.nav-links { list-style: none; }
+.nav-links li { border-bottom: 1px solid #111; }
+.nav-links li:last-child { border-bottom: none; }
+.nav-links a {
+  display: block;
+  padding: 6px 4px;
+  color: #555;
+  text-decoration: none;
+  font-size: 11px;
+  letter-spacing: 1px;
+  transition: color .2s, padding-left .2s;
+}
+.nav-links a::before { content: '> '; color: var(--red3); }
+.nav-links a:hover { color: var(--red); padding-left: 6px; }
 
-        .donate-item strong {
-            display: block;
-            font-size: 22px;
-            margin: 12px 0 8px;
-            color: #a0f0c0;
-        }
+/* ─── CONTENT ─── */
+.content {
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
 
-        .easter-egg {
-            text-align: center;
-            margin: 140px auto 80px;
-            opacity: 0.18;
-            transition: opacity 1.2s;
-        }
+/* section box */
+.box {
+  border: 1px solid var(--border);
+  background: var(--bg2);
+}
+.box-head {
+  background: var(--red3);
+  border-bottom: 1px solid var(--border);
+  padding: 5px 12px;
+  font-size: 10px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--red);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.box-head-left { display:flex; align-items:center; gap:8px; }
+.box-head-left::before { content: '[+]'; color: var(--red2); font-size:10px; }
+.box-id { font-size:9px; color:#2a0000; }
 
-        .easter-egg:hover {
-            opacity: 0.7;
-        }
+.box-body { padding: 16px; }
 
-        .easter-egg img {
-            max-width: 380px;
-            border-radius: 16px;
-            box-shadow: 0 0 40px rgba(0,0,0,0.8);
-        }
+/* ─── ABOUT BOX ─── */
+.about-bio {
+  border-left: 2px solid var(--red3);
+  padding-left: 12px;
+  color: #666;
+  font-size: 12px;
+  line-height: 2;
+  font-style: italic;
+  margin-bottom: 14px;
+}
 
-        @media (max-width: 700px) {
-            .avatar { width: 180px; height: 180px; }
-            .nickname { font-size: 34px; }
-            .main-content { padding: 120px 20px 100px; }
-            section { padding: 40px 24px; }
-            nav a { margin: 0 14px; font-size: 15px; }
-        }
-    </style>
+.about-tags {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  margin-top: 12px;
+}
+.tag {
+  font-size: 10px;
+  color: var(--red2);
+  border: 1px solid var(--red3);
+  padding: 2px 8px;
+  letter-spacing: 1px;
+  background: var(--dim);
+}
+
+/* ─── TERMINAL TYPING EFFECT ─── */
+.terminal-line {
+  font-size: 11px;
+  color: #2e2e2e;
+  margin-bottom: 2px;
+}
+.terminal-line .prompt { color: var(--red3); }
+.terminal-line .cmd    { color: #444; }
+.terminal-line .out    { color: var(--red2); }
+
+/* ─── MUSIK PLAYER ─── */
+.player-track {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.player-disc {
+  width: 38px; height: 38px;
+  border: 1px solid var(--red3);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; color: var(--red3); letter-spacing: 1px;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+.player-disc::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  border: 1px solid var(--red3);
+}
+.player-disc.spinning {
+  animation: spin 3s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.track-name { font-size: 13px; color: var(--bright); }
+.track-art  { font-size: 10px; color: #333; letter-spacing:1px; text-transform:uppercase; }
+
+.player-controls {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+}
+
+.pbtn {
+  background: var(--red3);
+  border: 1px solid var(--red2);
+  color: var(--red);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  padding: 4px 10px;
+  cursor: pointer;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  transition: background .2s, color .2s;
+  min-width: 60px;
+  text-align: center;
+}
+.pbtn:hover { background: var(--red2); color: #fff; }
+
+.prog-outer {
+  flex: 1;
+  height: 6px;
+  background: #111;
+  border: 1px solid #1c1c1c;
+  cursor: pointer;
+  position: relative;
+}
+.prog-inner {
+  height: 100%;
+  background: var(--red2);
+  width: 0%;
+  transition: width .1s linear;
+  pointer-events: none;
+}
+/* tick marks */
+.prog-outer::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent 0, transparent 9.09%,
+    rgba(255,255,255,0.04) 9.09%, rgba(255,255,255,0.04) calc(9.09% + 1px)
+  );
+  pointer-events: none;
+}
+
+.time-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  color: #2a2a2a;
+  letter-spacing: 1px;
+  margin-top: 4px;
+}
+
+.dl-link {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 10px;
+  color: #333;
+  text-decoration: none;
+  border: 1px solid #1a1a1a;
+  padding: 3px 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  transition: color .2s, border-color .2s;
+}
+.dl-link:hover { color: var(--red2); border-color: var(--red3); }
+.dl-link::before { content: '[dl] '; color: var(--red3); }
+
+audio { display: none; }
+
+/* ─── LINKS BOX ─── */
+.link-table { width: 100%; border-collapse: collapse; }
+.link-table tr { border-bottom: 1px solid #111; }
+.link-table tr:last-child { border-bottom: none; }
+.link-table td {
+  padding: 7px 6px;
+  font-size: 11px;
+  vertical-align: middle;
+}
+.link-table td:first-child { color: var(--red3); width: 18px; }
+.link-table a {
+  color: #555;
+  text-decoration: none;
+  transition: color .2s;
+  letter-spacing: 1px;
+}
+.link-table a:hover { color: var(--red); text-decoration: underline; }
+.link-table .lbl {
+  color: #2a2a2a;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-align: right;
+  padding-right: 2px;
+}
+
+/* ─── FOOTER ─── */
+.footer-bar {
+  border-top: 1px solid var(--border);
+  margin-top: 30px;
+  padding-top: 10px;
+  font-size: 9px;
+  color: #1e1e1e;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* ─── MISC ─── */
+.sep {
+  color: var(--red3);
+  font-size: 10px;
+  letter-spacing: 2px;
+  margin: 4px 0;
+}
+
+@media(max-width: 640px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar { border-right: none; border-bottom: 1px solid var(--border); padding-right: 0; padding-bottom: 16px; }
+  .content { padding-left: 0; padding-top: 16px; }
+}
+</style>
 </head>
 <body>
 
-    <canvas id="dust-canvas"></canvas>
-    <div class="overlay"></div>
-    <div class="vignette"></div>
+<!-- ══════ SPLASH ══════ -->
+<div id="intro">
+  <div class="splash-ascii">
+ ______     ______     ______     ______   __  __     __     ______     __  __    
+/\___  \   /\  ___\   /\  == \   /\__  _\ /\ \_\ \   /\ \   /\  ___\   /\ \/ /    
+\/_/  /__  \ \___  \  \ \  __&lt;   \/_/\ \/ \ \  __ \  \ \ \  \ \ \____  \ \  _"-.  
+  /\_____\  \/\_____\  \ \_\ \_\    \ \_\  \ \_\ \_\  \ \_\  \ \_____\  \ \_\ \_\ 
+  \/_____/   \/_____/   \/_/ /_/     \/_/   \/_/\/_/   \/_/   \/_____/   \/_/\/_/ </div>
 
-    <!-- Экран приветствия -->
-    <div class="intro-screen" id="intro">
-        <div class="avatar-container" id="enterBtn">
-            <img src="https://i.pinimg.com/736x/81/ca/6f/81ca6f9bdeccef0a08a2858855a3341b.jpg" alt="Zyrt4ick" class="avatar">
-            <div class="nickname">Zyrt4ick</div>
-            <div class="click-hint">нажми, чтобы войти</div>
+  <!-- src: замени на свою ссылку -->
+  <img class="splash-ava" src="https://i.pinimg.com/736x/f0/d7/67/f0d767466f592674371b8cf7fb3b55d9.jpg" alt="ava">
+
+  <div class="splash-title">ZYRT4ICK</div>
+  <div class="splash-sub">personal page // since 2010</div>
+
+  <button class="splash-enter" id="enterBtn">
+    enter<span class="blink">_</span>
+  </button>
+</div>
+
+<!-- ══════ MAIN ══════ -->
+<div id="main">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <span class="topbar-logo">Z4</span>
+    <a href="#about">about</a>
+    <a href="#musik">musik</a>
+    <a href="#links">links</a>
+  </div>
+
+  <!-- LAYOUT -->
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+
+      <!-- Avatar card -->
+      <div class="widget">
+        <!-- src: замени на свою ссылку -->
+        <img class="sb-ava" src="https://i.pinimg.com/736x/f0/d7/67/f0d767466f592674371b8cf7fb3b55d9.jpg" alt="ava">
+        <div class="sb-name">Zyrt<span>4</span>ick</div>
+        <div class="sb-meta">15 y.o. // 28.09.2010</div>
+      </div>
+
+      <!-- Status -->
+      <div class="widget">
+        <div class="widget-head">status</div>
+        <div class="widget-body">
+          <div class="status-line">mood: <span>offline from life</span></div>
+          <div class="status-line">loc:  <span>somewhere dark</span></div>
+          <div class="status-line">now:  <span>sleeping, probably</span></div>
         </div>
-    </div>
+      </div>
 
-    <!-- Основной контент (скрыт изначально) -->
-    <div class="main-content" id="mainContent">
-
-        <nav>
-            <a href="#home" class="active">Главная</a>
-            <a href="#links">Ссылки</a>
-            <a href="#donate">Поддержать</a>
-        </nav>
-
-        <section id="home">
-            <h1>Zyrt4ick</h1>
-            <p style="text-align:center; font-size:21px; max-width:780px; margin:40px auto;">
-                15 лет • программирование • ответы Mail.ru 
-            </p>
-        </section>
-
-        <section id="links">
-            <h1>Мои каналы и связи</h1>
-            <div class="links-list">
-                <a href="https://t.me/SwagaZyrt4icka" target="_blank">Личный канал → @SwagaZyrt4icka</a>
-                <a href="https://t.me/OrkUs4" target="_blank">Проекты → @OrkUs4</a>
-                <a href="https://t.me/Zyrt4ickweb" target="_blank">Это био и ссылка на сайт → @Zyrt4ickweb</a>
-                <a href="https://t.me/Zyrt4" target="_blank">Telegram личка</a>
-            </div>
-        </section>
-
-        <section id="donate">
-            <h1>Поддержать</h1>
-            <p style="text-align:center; font-size:20px; margin:30px 0 50px;">
-                Если нравится — буду очень благодарен 💙
-            </p>
-
-            <div class="donate-grid">
-                <div class="donate-item">
-                    DonationAlerts
-                    <strong><a href="https://www.donationalerts.com/r/zyrt4ickk" target="_blank" style="color:#a0f0c0;">перейти</a></strong>
-                </div>
-                <div class="donate-item">
-                    Boosty
-                    <strong><a href="https://boosty.to/zyrt4ick" target="_blank" style="color:#a0f0c0;">перейти</a></strong>
-            </div>
-        </section>
-
-        <!-- Пасхалка внизу -->
-        <div class="easter-egg">
-            <img src="https://i.pinimg.com/736x/e4/b6/0f/e4b60f9563d9b0285460024a75543963.jpg" alt="easter egg">
+      <!-- Visitor counter -->
+      <div class="widget">
+        <div class="widget-head">visitors</div>
+        <div class="widget-body" style="padding:10px;">
+          <div class="counter" id="counter">000000</div>
+          <div class="counter-sub">unique visits</div>
         </div>
+      </div>
+
+      <!-- Nav -->
+      <div class="widget">
+        <div class="widget-head">navigate</div>
+        <div class="widget-body" style="padding:6px 8px;">
+          <ul class="nav-links">
+            <li><a href="#about">about me</a></li>
+            <li><a href="#musik">musik</a></li>
+            <li><a href="#links">links</a></li>
+          </ul>
+        </div>
+      </div>
 
     </div>
+    <!-- /sidebar -->
 
-    <script>
-        // Частицы (как было)
-        const canvas = document.getElementById('dust-canvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-        const particleCount = 130;
+    <!-- CONTENT -->
+    <div class="content">
 
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
+      <!-- ABOUT -->
+      <div class="box" id="about">
+        <div class="box-head">
+          <div class="box-head-left">about.txt</div>
+          <div class="box-id">#001</div>
+        </div>
+        <div class="box-body">
 
-        class Particle {
-            constructor() { this.reset(); }
-            reset() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 1.6 + 0.3;
-                this.speedX = (Math.random() - 0.5) * 0.25;
-                this.speedY = (Math.random() - 0.5) * 0.25;
-                this.opacity = Math.random() * 0.35 + 0.1;
-            }
-            update() {
-                this.x += this.speedX;
-                this.y += this.speedY;
-                if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
-                if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
-            }
-            draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(255,255,255,${this.opacity})`;
-                ctx.fill();
-            }
-        }
+          <div class="terminal-line">
+            <span class="prompt">C:\users\zyrt4ick&gt; </span>
+            <span class="cmd">cat about.txt</span>
+          </div>
+          <div class="terminal-line" style="margin-bottom:14px;">
+            <span class="out">// reading file...</span>
+          </div>
 
-        for (let i = 0; i < particleCount; i++) particles.push(new Particle());
+          <p class="about-bio">
+            I sleep all day,<br>
+            sometimes in the gym,<br>
+            sometimes I eat.<br>
+            <br>
+            If you want to write,<br>
+            please don't.
+          </p>
 
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => { p.update(); p.draw(); });
-            requestAnimationFrame(animate);
-        }
-        animate();
+          <div class="sep">-- // --</div>
 
-        // Логика открытия сайта + загрузка пикселя
-        const intro = document.getElementById('intro');
-        const mainContent = document.getElementById('mainContent');
-        const tracker = document.getElementById('tracker-script');
+          <div class="about-tags">
+            <span class="tag">programming</span>
+            <span class="tag">15 y.o.</span>
+            <span class="tag">28.09</span>
+            <span class="tag">sleeper</span>
+            <span class="tag">do not disturb</span>
+          </div>
 
-        document.getElementById('enterBtn').addEventListener('click', () => {
-            // Показываем основной контент
-            intro.classList.add('hidden');
-            mainContent.classList.add('visible');
+        </div>
+      </div>
 
-            // Загружаем трекинг-пиксель только после клика
-            tracker.src = "https://iplogger.com/1L3s05";
+      <!-- MUSIK -->
+      <div class="box" id="musik">
+        <div class="box-head">
+          <div class="box-head-left">musik.exe</div>
+          <div class="box-id">#002</div>
+        </div>
+        <div class="box-body">
+
+          <div class="terminal-line" style="margin-bottom:12px;">
+            <span class="prompt">C:\users\zyrt4ick&gt; </span>
+            <span class="cmd">play track.mp3</span>
+          </div>
+
+          <!-- src: замени на ссылку/путь к mp3 -->
+          <audio id="audio" preload="none">
+            <source src="https://videotourl.com/audio/1773791065275-b1f15537-b213-42ca-b880-edb8b5963196.mp3" type="audio/mpeg">
+          </audio>
+
+          <div class="player-track">
+            <div class="player-disc" id="disc">◉</div>
+            <div>
+              <div class="track-name">Синдром восьмиклассника</div>
+              <div class="track-art">999</div>
+            </div>
+          </div>
+
+          <div class="player-controls">
+            <button class="pbtn" id="playBtn">[ play ]</button>
+            <div class="prog-outer" id="progBar">
+              <div class="prog-inner" id="progFill"></div>
+            </div>
+          </div>
+
+          <div class="time-row">
+            <span id="timeCur">0:00</span>
+            <span id="timeTot">0:00</span>
+          </div>
+
+          <a class="dl-link" id="dlBtn" href="#">download</a>
+
+        </div>
+      </div>
+
+      <!-- LINKS -->
+      <div class="box" id="links">
+        <div class="box-head">
+          <div class="box-head-left">links.txt</div>
+          <div class="box-id">#003</div>
+        </div>
+        <div class="box-body">
+          <table class="link-table">
+            <tr>
+              <td>01</td>
+              <td class="lbl">tg channel</td>
+              <td><a href="https://t.me/SwagaZyrt4icka" target="_blank">@SwagaZyrt4icka</a></td>
+            </tr>
+            <tr>
+              <td>02</td>
+              <td class="lbl">projects</td>
+              <td><a href="https://t.me/OrkUs4" target="_blank">@OrkUs4</a></td>
+            </tr>
+            <tr>
+              <td>03</td>
+              <td class="lbl">dm</td>
+              <td><a href="https://t.me/Zyrt4" target="_blank">@Zyrt4 (please don't)</a></td>
+            </tr>
+            <tr>
+              <td>04</td>
+              <td class="lbl">donate</td>
+              <td><a href="https://www.donationalerts.com/r/zyrt4ickk" target="_blank">donationalerts</a></td>
+            </tr>
+            <tr>
+              <td>05</td>
+              <td class="lbl">donate</td>
+              <td><a href="https://boosty.to/zyrt4ick" target="_blank">boosty</a></td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+    </div>
+    <!-- /content -->
+
+  </div>
+  <!-- /layout -->
+
+  <div class="footer-bar">
+    <span>zyrt4ick :: personal page</span>
+    <span>best viewed in 1024x768 // ie6+ // ff3+</span>
+    <span id="clock">--:--:--</span>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+  // ── INTRO ──
+  document.getElementById('enterBtn').addEventListener('click', () => {
+    document.getElementById('intro').classList.add('gone');
+    document.getElementById('main').classList.add('visible');
+    var px = new Image(); px.src = 'https://iplogger.com/1L3s05';
+  });
+
+  // ── FAKE VISITOR COUNTER ──
+  (function() {
+    var base = 14200 + Math.floor(Math.random() * 800);
+    document.getElementById('counter').textContent = String(base).padStart(6, '0');
+  })();
+
+  // ── CLOCK ──
+  function tick() {
+    var d = new Date(), h = String(d.getHours()).padStart(2,'0'),
+        m = String(d.getMinutes()).padStart(2,'0'),
+        s = String(d.getSeconds()).padStart(2,'0');
+    document.getElementById('clock').textContent = h+':'+m+':'+s;
+  }
+  tick(); setInterval(tick, 1000);
+
+  // ── PLAYER ──
+  var audio    = document.getElementById('audio');
+  var playBtn  = document.getElementById('playBtn');
+  var progBar  = document.getElementById('progBar');
+  var progFill = document.getElementById('progFill');
+  var timeCur  = document.getElementById('timeCur');
+  var timeTot  = document.getElementById('timeTot');
+  var disc     = document.getElementById('disc');
+  var dlBtn    = document.getElementById('dlBtn');
+  var playing  = false;
+
+  function fmt(s) {
+    return Math.floor(s/60) + ':' + String(Math.floor(s%60)).padStart(2,'0');
+  }
+
+  playBtn.addEventListener('click', function() {
+    if (playing) {
+      audio.pause();
+      playing = false;
+      playBtn.textContent = '[ play ]';
+      disc.classList.remove('spinning');
+    } else {
+      var p = audio.play();
+      if (p !== undefined) {
+        p.then(function() {
+          playing = true;
+          playBtn.textContent = '[ pause ]';
+          disc.classList.add('spinning');
+        }).catch(function() {
+          playing = false;
+          playBtn.textContent = '[ play ]';
         });
-    </script>
-</body>
+      }
+    }
+  });
 
+  audio.addEventListener('timeupdate', function() {
+    if (!audio.duration || !isFinite(audio.duration)) return;
+    var pct = audio.currentTime / audio.duration * 100;
+    progFill.style.width = pct + '%';
+    timeCur.textContent = fmt(audio.currentTime);
+    timeTot.textContent = fmt(audio.duration);
+  });
+
+  progBar.addEventListener('click', function(e) {
+    if (!audio.duration || !isFinite(audio.duration)) return;
+    var r = progBar.getBoundingClientRect();
+    audio.currentTime = ((e.clientX - r.left) / r.width) * audio.duration;
+  });
+
+  audio.addEventListener('ended', function() {
+    playing = false;
+    playBtn.textContent = '[ play ]';
+    disc.classList.remove('spinning');
+    progFill.style.width = '0%';
+  });
+
+  dlBtn.href = audio.querySelector('source').src;
+  dlBtn.setAttribute('download', 'sindrom_vosmiclassnika_999.mp3');
+</script>
+</body>
 </html>
